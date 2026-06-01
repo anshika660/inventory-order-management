@@ -15,9 +15,10 @@ except Exception as e:
 
 app = FastAPI(title="Inventory & Order Management System API")
 
+# CORRECTED: Sirf ek baar middleware add karein
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Production mein yahan Vercel ka URL daalna safe hota hai
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,7 +27,6 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"status": "Online", "system": "Inventory & Order Management System API"}
-
 
 # ==========================================
 # 📦 PRODUCT ENDPOINTS
@@ -41,8 +41,7 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
             detail=f"Product with SKU '{product.sku}' already exists."
         )
     
-    # Clean conversion of Pydantic model to Python dictionary
-    product_data = product.dict() if hasattr(product, 'dict') else product.model_dump()
+    product_data = product.model_dump() # Pydantic v2 compliant
     db_product = models.Product(**product_data)
     
     db.add(db_product)
@@ -53,7 +52,6 @@ def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)
 @app.get("/products", response_model=List[schemas.ProductResponse])
 def get_all_products(db: Session = Depends(get_db)):
     return db.query(models.Product).all()
-
 
 # ==========================================
 # 👥 CUSTOMER ENDPOINTS
@@ -68,7 +66,7 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_
             detail=f"Customer with email '{customer.email}' is already registered."
         )
     
-    customer_data = customer.dict() if hasattr(customer, 'dict') else customer.model_dump()
+    customer_data = customer.model_dump()
     db_customer = models.Customer(**customer_data)
     
     db.add(db_customer)
@@ -80,9 +78,8 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_
 def get_all_customers(db: Session = Depends(get_db)):
     return db.query(models.Customer).all()
 
-
 # ==========================================
-# 🛒 ORDER ENDPOINTS & LOGIC
+# 🛒 ORDER ENDPOINTS
 # ==========================================
 
 @app.post("/orders", response_model=schemas.OrderResponse, status_code=status.HTTP_201_CREATED)
@@ -95,16 +92,13 @@ def place_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found.")
 
-    # Core Business Validation: Check stock levels safely
     if product.stock_quantity < order.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail=f"Insufficient stock. Available: {product.stock_quantity}, Requested: {order.quantity}"
         )
 
-    # Automatic inventory reduction
     product.stock_quantity -= order.quantity
-
     db_order = models.Order(
         customer_id=order.customer_id,
         product_id=order.product_id,
