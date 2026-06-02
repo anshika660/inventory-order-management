@@ -46,4 +46,4 @@ Launch the Application:
 
 Bash
 docker-compose up --build
-The API will be available at http://localhost:8000 and the database will be running on port 5432.
+The API will be available at http://localhost:10000 and the database will be running on port 5432.
