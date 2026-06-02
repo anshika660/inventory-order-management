@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'const API_BASE_URL = 'https://inventory-order-management-e2fi.onrender.com';';
+const API_BASE_URL = 'https://inventory-order-management-e2fi.onrender.com';
 
 function App() {
   const [products, setProducts] = useState([]);
