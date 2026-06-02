@@ -5,6 +5,9 @@ Live Application
 Frontend (Dashboard): https://inventory-order-management-l1df.vercel.app/
 
 Backend API Documentation: https://inventory-order-management-e2fi.onrender.com/docs
+## Deployment & Containerization
+This project is fully containerized to ensure seamless deployment across different environments.
+Backend Docker Image : https://hub.docker.com/r/anshika660/inventory-backend
 
  Tech Stack
 Backend: FastAPI, SQLAlchemy, PostgreSQL (Neon)
